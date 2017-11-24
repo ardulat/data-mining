@@ -1,47 +1,45 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import math
 
 from sklearn.svm import SVR
 from sklearn.linear_model import LinearRegression, SGDRegressor
+from sklearn.metrics import mean_squared_error
 
 
 tt = pd.read_csv('dm-final-train.txt', header=None)
 test = pd.read_csv('dm-final-testdist.txt', header=None)
 
 index = tt.values[:, 0]
-X = tt.values[:, 1:101]
-y = tt.values[:, 101:121]
+# X_train = tt.values[:1500, 1:101]
+# X_test = tt.values[1501:, 1:101]
+# y_train = tt.values[:1500, 101:121]
+# y_test = tt.values[1501:, 101:121]
+X_train = tt.values[:, 1:101]
+y_train = tt.values[:, 101:121]
 indexTest = test.values[:, 0]
-XTest = test.values[:, 1:]
-# print(XTest.shape)
-# XTest = XTest[np.newaxis, :]
-# print(XTest.shape)
-
-# svr = SVR(kernel='rbf', gamma=0.1)
-# svr.fit(X, y)
-# print(svr)
+X_test = test.values[:, :]
 
 clf = LinearRegression()
-clf.fit(X, y)
+# clf.fit(X, y)
+clf.fit(X_train, y_train)
 
-yp = clf.predict(XTest)
+y_pred = clf.predict(X_test[:,1:])
+# yp = clf.predict(XTest[:,1:])
+
+# mse = mean_squared_error(y_test, y_pred)
+# print(math.sqrt(mse))
 
 with open('dm-final-testpred.txt', 'w') as file:
-    # print(indexTest.shape)
-    # print(XTest.shape)
-    # print(yp.shape)
-    # data = np.concatenate((indexTest, XTest), axis=1)
-    # data = np.concatenate((data, yp), axis=1)
-    # print(data)   
-    data = np.hstack((test, yp))
-    # data = np.hstack((data, yp))
-    df = pd.DataFrame(data, columns=range(0, 121))
-    df.to_csv(file)
+    data = np.hstack((X_test, y_pred))
+    df = pd.DataFrame(data, columns=range(len(data[0])))
+    df.to_csv(file, index=False)
     file.close()
 
-# plt.plot(np.hstack((XTest,yp))[0])
-# plt.plot(XTest[0], c='r')
-# # plt.plot([n,1:], c='g')
-# plt.grid()
-# plt.show()
+# plt.plot(np.hstack((X_test,y_test))[0])
+plt.plot(np.hstack((X_test,y_pred))[0], c='r')
+plt.plot(X_test[0])
+# plt.plot([n,1:], c='g')
+plt.grid()
+plt.show()

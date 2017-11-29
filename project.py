@@ -16,6 +16,9 @@ from sklearn.preprocessing import MinMaxScaler
 #import tensorflow as tf
 #config = tf.ConfigProto()
 
+X_scaler = MinMaxScaler()
+Y_scaler = MinMaxScaler()
+
 def get_data(file_name, batch):
     data = pd.read_csv(file_name, header=None)
  #   zero_data = pd.DataFrame(np.zeros(shape=(data.shape[0], 80)))
@@ -23,19 +26,19 @@ def get_data(file_name, batch):
 
     train = data.loc[0:1450, :]
     test = data.loc[1451:, :]
-    
-    # Preprocessing using min-max
-    scaler_train = MinMaxScaler()
-    scaler_train.fit(train)
-    
-    train = scaler_train.transform(train)
-    test = scaler_train.transform(test)
 
-    train_X = np.expand_dims((train[:, 1:batch]).T, axis=2)
-    train_Y = np.expand_dims((train[:, (batch + 1):]).T, axis=2)
+    # Preprocessing/scaling using min-max
+    train_X = X_scaler.fit_transform(train.loc[:, 1:batch])
+    train_Y = Y_scaler.fit_transform(train.loc[:, (batch + 1):])
 
-    test_X = np.expand_dims((test[:, 1:batch]).T, axis=2)
-    test_Y = np.expand_dims((test[:, (batch + 1):]).T, axis=2)
+    test_X = X_scaler.transform(test.loc[:, 1:batch])
+    test_Y = Y_scaler.transform(test.loc[:, (batch + 1):])
+
+    train_X = np.expand_dims(train_X.T, axis=2)
+    train_Y = np.expand_dims(train_Y.T, axis=2)
+
+    test_X = np.expand_dims(test_X.T, axis=2)
+    test_Y = np.expand_dims(test_Y.T, axis=2)
 
     return train_X, train_Y, test_X, test_Y
 
@@ -53,7 +56,7 @@ layers_stacked_count = 2
 
 # Optmizer:
 learning_rate = 0.0001 
-nb_iters = 1000
+nb_iters = 10000
 lr_decay = 0.92 
 momentum = 0.5  
 lambda_l2_reg = 0.0001
@@ -203,18 +206,19 @@ print("Let's visualize {} predictions with our signals:".format(nb_predictions))
 # X, Y = generate_x_y_data(isTrain=False, batch_size=nb_predictions)
 #X, Y = test_X, test_Y
 data = pd.read_csv('dm-final-testdist.txt', header = None)
-X = np.expand_dims((data.loc[:, 1:]).T, axis=2)
-
-tran = np.squeeze(X, axis=2)
-scaler_test = MinMaxScaler()
-scaler_test.fit(tran)
-scaler_test.transform(tran)
+X = data.loc[:, 1:]
+X = X_scaler.transform(X)
+X = np.expand_dims(X.T, axis=2)
 
 feed_dict = {encoder[t]: X[t] for t in range(X_length)}
 outputs = np.array(sess.run([reshaped_outputs], feed_dict)[0])
 
-results  = np.squeeze(outputs, axis=2)
-results = scaler_test.inverse_transform(results)
+results = np.squeeze(outputs, axis=2)
+results = results.T
+results = results[:,0:20]
+
+# rescale
+results = Y_scaler.inverse_transform(results)
 
 df = pd.DataFrame(data=results.astype(float))
 df.to_csv('predictions.txt', sep=' ', header=False, float_format='%.2f', index=False)

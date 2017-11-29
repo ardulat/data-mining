@@ -7,9 +7,8 @@ import matplotlib.pyplot as plt
 
 
 
-res = pd.read_csv('predictions.txt',sep = ' ', header = None)
-res = res.T
-results  = res.loc[:,0:19]
+results = pd.read_csv('predictions.txt',sep = ' ', header = None)
+# res = res.T
 
 
 

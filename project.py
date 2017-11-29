@@ -16,6 +16,7 @@ from sklearn.preprocessing import MinMaxScaler
 #import tensorflow as tf
 #config = tf.ConfigProto()
 
+scaler = MinMaxScaler()
 
 def get_data(file_name, batch):
     data = pd.read_csv(file_name, header=None)
@@ -26,7 +27,6 @@ def get_data(file_name, batch):
     test = data.loc[1451:, :]
     
     # Preprocessing using min-max
-    scaler = MinMaxScaler()
     scaler.fit(train)
     
     train = scaler.transform(train)
@@ -54,7 +54,7 @@ layers_stacked_count = 2
 
 # Optmizer:
 learning_rate = 0.0001 
-nb_iters = 10000
+nb_iters = 500
 lr_decay = 0.92 
 momentum = 0.5  
 lambda_l2_reg = 0.0001
@@ -169,7 +169,7 @@ for t in range(nb_iters + 1):
     train_loss = train_batch()
     train_losses.append(train_loss)
 
-    if t % 500 == 0:
+    if t % 100 == 0:
         # Tester
         test_loss = test_batch()
         test_losses.append(test_loss)
@@ -211,6 +211,7 @@ feed_dict = {encoder[t]: X[t] for t in range(X_length)}
 outputs = np.array(sess.run([reshaped_outputs], feed_dict)[0])
 
 results  = np.squeeze(outputs, axis=2)
+scaler.inverse_transform(results)
 
 df = pd.DataFrame(data=results.astype(float))
 df.to_csv('predictions.txt', sep=' ', header=False, float_format='%.2f', index=False)

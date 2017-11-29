@@ -16,8 +16,6 @@ from sklearn.preprocessing import MinMaxScaler
 #import tensorflow as tf
 #config = tf.ConfigProto()
 
-scaler = MinMaxScaler()
-
 def get_data(file_name, batch):
     data = pd.read_csv(file_name, header=None)
  #   zero_data = pd.DataFrame(np.zeros(shape=(data.shape[0], 80)))
@@ -27,10 +25,11 @@ def get_data(file_name, batch):
     test = data.loc[1451:, :]
     
     # Preprocessing using min-max
-    scaler.fit(train)
+    scaler_train = MinMaxScaler()
+    scaler_train.fit(train)
     
-    train = scaler.transform(train)
-    test = scaler.transform(test)
+    train = scaler_train.transform(train)
+    test = scaler_train.transform(test)
 
     train_X = np.expand_dims((train[:, 1:batch]).T, axis=2)
     train_Y = np.expand_dims((train[:, (batch + 1):]).T, axis=2)
@@ -54,7 +53,7 @@ layers_stacked_count = 2
 
 # Optmizer:
 learning_rate = 0.0001 
-nb_iters = 500
+nb_iters = 1000
 lr_decay = 0.92 
 momentum = 0.5  
 lambda_l2_reg = 0.0001
@@ -197,7 +196,6 @@ out_png = 'losses.png'
 plt.savefig(out_png, dpi=150)
 plt.show(block=True)
 
-
 # Test
 nb_predictions = 5
 print("Let's visualize {} predictions with our signals:".format(nb_predictions))
@@ -207,11 +205,16 @@ print("Let's visualize {} predictions with our signals:".format(nb_predictions))
 data = pd.read_csv('dm-final-testdist.txt', header = None)
 X = np.expand_dims((data.loc[:, 1:]).T, axis=2)
 
+tran = np.squeeze(X, axis=2)
+scaler_test = MinMaxScaler()
+scaler_test.fit(tran)
+scaler_test.transform(tran)
+
 feed_dict = {encoder[t]: X[t] for t in range(X_length)}
 outputs = np.array(sess.run([reshaped_outputs], feed_dict)[0])
 
 results  = np.squeeze(outputs, axis=2)
-scaler.inverse_transform(results)
+results = scaler_test.inverse_transform(results)
 
 df = pd.DataFrame(data=results.astype(float))
 df.to_csv('predictions.txt', sep=' ', header=False, float_format='%.2f', index=False)

@@ -1,7 +1,4 @@
-
 # coding: utf-8
-
-# In[1]:
 
 
 import pandas as pd
@@ -9,15 +6,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-# In[3]:
-
 
 res = pd.read_csv('predictions.txt',sep = ' ', header = None)
 res = res.T
 results  = res.loc[:,0:19]
 
-
-# In[4]:
 
 
 ##Анчик эта ячейка для того, чтобы записать все в файл, понял, бля???
@@ -26,13 +19,7 @@ data  = pd.concat([data_init, results], axis=1, ignore_index=True)
 data.to_csv('final_results.csv', sep=',', header=None, index=False)
 
 
-# In[5]:
-
-
 data.shape
-
-
-# In[6]:
 
 
 ### А эти две чтобы плотить
@@ -52,22 +39,6 @@ def get_data(file_name, batch):
 train_X, train_Y, test_X, test_Y = get_data('final_results.csv', 100)
 
 
-# In[7]:
-
-
 plt.plot(range(len(train_X[:, 0,:])), train_X[:,300,:], "o--b")
 plt.plot(range(len(train_X[:, 0,:]), len(train_X[:, 0,:])+len(train_Y[:, 0,:])), train_Y[:,300,:], "x--r")
 plt.show()
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-

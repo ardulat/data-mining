@@ -16,8 +16,8 @@ from sklearn.preprocessing import MinMaxScaler
 #import tensorflow as tf
 #config = tf.ConfigProto()
 
-X_scaler = MinMaxScaler()
-Y_scaler = MinMaxScaler()
+X_scaler = MinMaxScaler(feature_range=(-1,1))
+Y_scaler = MinMaxScaler(feature_range=(-1,1))
 
 def get_data(file_name, batch):
     data = pd.read_csv(file_name, header=None)
@@ -51,12 +51,12 @@ Y_length = train_Y.shape[0]
 
 
 output_dim = input_dim = train_X.shape[-1] 
-hidden_dim = 50
+hidden_dim = 100
 layers_stacked_count = 2  
 
 # Optmizer:
 learning_rate = 0.0001 
-nb_iters = 10000
+nb_iters = 5000
 lr_decay = 0.92 
 momentum = 0.5  
 lambda_l2_reg = 0.0001

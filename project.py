@@ -52,12 +52,12 @@ Y_length = train_Y.shape[0]
 
 output_dim = input_dim = train_X.shape[-1] 
 hidden_dim = 100
-layers_stacked_count = 2  
+layers_stacked_count = 9
 
 # Optmizer:
-learning_rate = 0.0001 
-nb_iters = 5000
-lr_decay = 0.92 
+learning_rate = 0.0002
+nb_iters = 1000
+lr_decay = 0.95
 momentum = 0.5  
 lambda_l2_reg = 0.0001
 
@@ -93,8 +93,8 @@ with tf.variable_scope('Seq2seq'):
     cells = []
     for i in range(layers_stacked_count):
         with tf.variable_scope('RNN_{}'.format(i)):
-            cells.append(tf.nn.rnn_cell.GRUCell(hidden_dim))
-            # cells.append(tf.nn.rnn_cell.BasicLSTMCell(...))
+            # cells.append(tf.nn.rnn_cell.GRUCell(hidden_dim))
+            cells.append(tf.nn.rnn_cell.BasicLSTMCell(hidden_dim))
     cell = tf.nn.rnn_cell.MultiRNNCell(cells)
 
     # For reshaping the input and output dimensions of the seq2seq RNN:
@@ -132,7 +132,7 @@ with tf.variable_scope('Loss'):
     loss = output_loss + lambda_l2_reg * reg_loss
 
 with tf.variable_scope('Optimizer'):
-    optimizer = tf.train.RMSPropOptimizer(learning_rate, decay=lr_decay, momentum=momentum)
+    optimizer = tf.train.AdamOptimizer(learning_rate)#, decay=lr_decay, momentum=momentum)
     train_op = optimizer.minimize(loss)
 
 
